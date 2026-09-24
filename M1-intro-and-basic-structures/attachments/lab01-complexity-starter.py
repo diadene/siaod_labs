@@ -60,28 +60,51 @@ POW_CALLS = 20_000    # вызовов binary_pow на один замер: ин
 
 
 def array_sum(a: list[int]) -> int:
-    """Сумма элементов массива. Ожидаемая сложность: TODO (обосновать в отчёте)."""
+    """Сумма элементов массива. Ожидаемая сложность: O(n) TODO (обосновать в отчёте)."""
+    sum = 0
+    for i in range(len(a)):
+        sum += a[i]
+
     # TODO: реализовать циклом
-    raise NotImplementedError
+    return sum
 
 
 def array_max(a: list[int]) -> int:
-    """Максимум массива (массив непуст). Ожидаемая сложность: TODO."""
+    """Максимум массива (массив непуст). Ожидаемая сложность: O(n) TODO."""
+    max_num = a[0]
+    for i in a:
+        if max_num < i:
+            max_num = i
+
     # TODO: реализовать циклом
-    raise NotImplementedError
+    return max_num
 
 
 def count_equal_pairs(a: list[int]) -> int:
-    """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: TODO."""
-    # TODO: реализовать двойным циклом
-    raise NotImplementedError
+    """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: O(n^2)."""
+    equal = 0
+    for i in range(len(a)):
+        for j in range(i + 1, len(a)):
+            if a[i] == a[j]:
+                equal += 1
+    return equal
 
 
 def binary_pow(x: int, n: int, mod: int | None = None) -> int:
-    """Бинарное возведение в степень, n >= 0. Ожидаемая сложность: TODO.
-
+    """Бинарное возведение в степень, n >= 0. Ожидаемая сложность: O(log n) TODO.
     При заданном mod все умножения выполняются по модулю (результат x**n % mod).
     """
+    if n == 0: return 1
+    if n % 2 == 1:
+        res = binary_pow(x, n - 1, mod)
+        if mod is not None:
+            return (x * res) % mod
+        return x * res
+    b = binary_pow(x, n // 2, mod)
+    if mod is not None:
+        return (b * b) % mod
+    return b * b
+
     # TODO: реализовать через квадрирование; при mod применять % mod после
     # каждого умножения
     raise NotImplementedError
