@@ -94,17 +94,15 @@ def binary_pow(x: int, n: int, mod: int | None = None) -> int:
     """Бинарное возведение в степень, n >= 0. Ожидаемая сложность: O(log n) TODO.
     При заданном mod все умножения выполняются по модулю (результат x**n % mod).
     """
-    if n == 0: return 1
-    if n % 2 == 1:
-        res = binary_pow(x, n - 1, mod)
-        if mod is not None:
-            return (x * res) % mod
-        return x * res
-    b = binary_pow(x, n // 2, mod)
-    if mod is not None:
-        return (b * b) % mod
-    return b * b
-
+    res = 1
+    while n != 0:
+        if n & 1:
+            if mod == None: res = res * x
+            else: res = res * x % mod
+        if mod == None: x *= x
+        else: x = x * x % mod
+        n >>= 1
+    return res
     # TODO: реализовать через квадрирование; при mod применять % mod после
     # каждого умножения
     raise NotImplementedError
