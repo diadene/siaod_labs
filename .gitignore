@@ -12,6 +12,7 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.idea
 
 # Временные файлы офисных приложений
 ~$*.docx
