@@ -359,6 +359,11 @@ def inserts_front_deque(n: int) -> None:
     for i in range(n):
         d.appendleft(i)
 
+def push_front_custom_deque(n: int) -> None:
+    """n вставок в начало в свой Deque — ожидаемо O(1) на операцию."""
+    d = Deque()
+    for i in range(n):
+        d.push_front(i)
 
 def run_benchmarks(seed: int) -> None:
     """Средняя стоимость append и сравнение вставки в начало list/deque."""
@@ -368,13 +373,17 @@ def run_benchmarks(seed: int) -> None:
     for n in SIZES:
         t = bench(appends_dynamic_array, n)
         print(f"  n={n:>7}  всего t={t:.6f} c  на операцию t/n={t / n:.3e} c")
-    print("\nВставка в начало: list.insert(0, x) против deque.appendleft:")
+    print("\nВставка в начало: list.insert(0, x) / collections.deque / свой Deque:")
     for n in SIZES:
         if n > 30_000:
             continue  # вставка в начало list квадратична по суммарному времени
         t_list = bench(inserts_front_list, n)
         t_deque = bench(inserts_front_deque, n)
-        print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c")
+        t_custom = bench(push_front_custom_deque, n)
+        print(
+            f"  n={n:>7}  list={t_list:.6f} c  "
+            f"deque={t_deque:.6f} c  custom={t_custom:.6f} c"
+        )
     # TODO: снять аналогичные замеры для push_front своего Deque;
     # TODO: построить график t/n от n для append и включить его в отчёт;
     # TODO: провести амортизированный анализ push_back методом учёта (в отчёте).
