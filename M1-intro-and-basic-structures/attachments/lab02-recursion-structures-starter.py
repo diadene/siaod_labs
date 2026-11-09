@@ -16,6 +16,7 @@ import math
 import random
 import statistics
 import time
+from platform import node
 
 # ---------------------------------------------------------------------------
 # 1. Рекурсивные функции (счётчик вызовов — для сравнения наивной рекурсии
@@ -26,17 +27,23 @@ CALLS = {"fib_naive": 0, "fib_memo": 0}  # счётчики рекурсивны
 
 
 def factorial(n: int) -> int:
-    """Факториал n >= 0 рекурсивно. Ожидаемая сложность: TODO (обосновать в отчёте)."""
+    """Факториал n >= 0 рекурсивно. Ожидаемая сложность: O = n^2  TODO (обосновать в отчёте)."""
+    if n == 0:
+        return 1
     # TODO: базовое условие + рекурсивный переход
-    raise NotImplementedError
-
+    return factorial(n - 1) * n
 
 def fib_naive(n: int) -> int:
     """n-е число Фибоначчи наивной рекурсией; увеличивает CALLS["fib_naive"].
 
-    Ожидаемая сложность: TODO (экспоненциальная — показать счётчиком вызовов).
+    Ожидаемая сложность: O(2^n) (экспоненциальная — показать счётчиком вызовов).
     """
+
     CALLS["fib_naive"] += 1
+    if n == 0: return 0
+    if n == 1:
+        return 1
+    return fib_naive(n-1) + fib_naive(n - 2)
     # TODO: F(0)=0, F(1)=1, далее F(n)=F(n-1)+F(n-2)
     raise NotImplementedError
 
@@ -44,10 +51,22 @@ def fib_naive(n: int) -> int:
 def fib_memo(n: int, memo: dict[int, int] | None = None) -> int:
     """n-е число Фибоначчи с мемоизацией; увеличивает CALLS["fib_memo"].
 
-    Ожидаемая сложность: TODO (линейная — сравнить счётчики в отчёте).
+    Ожидаемая сложность: O(1) (линейная — сравнить счётчики в отчёте).
     """
+    if memo is None:
+        memo = {}
+    if n in memo:
+        return memo[n]
+
     CALLS["fib_memo"] += 1
-    # TODO: словарь memo передаётся по рекурсии; повторные подзадачи не пересчитываются
+
+    if n <= 2:
+        memo[n] = 1
+        return 1
+
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
     raise NotImplementedError
 
 
@@ -56,7 +75,15 @@ def hanoi(n: int, src: str = "A", dst: str = "C", aux: str = "B") -> int:
 
     Проверка в self_check: число перемещений равно 2**n - 1.
     """
-    # TODO: базовое условие n == 0; иначе перенести n-1 на aux, 1 на dst, n-1 на dst
+    if n <= 0: return 0
+    count = 0
+    # 1) перенести n-1 диск с src на aux (dst — вспомогательный)
+    count += hanoi(n - 1, src, aux, dst)
+    # 2) перенести оставшийся диск с src на dst
+    count += 1
+    # 3) перенести n-1 диск с aux на dst (src — вспомогательный)
+    count += hanoi(n - 1, aux, dst, src)
+    return count
     raise NotImplementedError
 
 
@@ -89,26 +116,33 @@ class DynamicArray:
 
     def _grow(self) -> None:
         """Увеличить ёмкость в 2 раза и скопировать элементы в новый буфер."""
-        # TODO: выделить новый буфер размера 2 * capacity, перенести _size элементов
-        raise NotImplementedError
+        new_capacity = 2 * self._capacity
+        new_buffer: list = [None] * new_capacity
+
+        for i in range(self._size): new_buffer[i] = self._buffer[i]
+        self._buffer = new_buffer
+        self._capacity = new_capacity
 
     def append(self, value) -> None:
         """Добавить элемент в конец; при size == capacity сначала вызвать _grow.
-
-        Амортизированная сложность: TODO (обосновать методом учёта в отчёте).
+        
+        Амортизированная сложность: O(1) (обосновать методом учёта в отчёте).
         """
-        # TODO: рост при необходимости, запись в ячейку _buffer[_size], инкремент _size
-        raise NotImplementedError
+        if self._size == self._capacity: self._grow()
+        self._buffer[self._size] = value
+        self._size += 1
 
     def get(self, index: int):
         """Вернуть элемент по индексу 0 <= index < size; иначе IndexError."""
-        # TODO: проверка границ + чтение из буфера
-        raise NotImplementedError
+        if 0 <= index < self._size: return self._buffer[index]
+        else: raise IndexError
+
 
     def set(self, index: int, value) -> None:
         """Записать элемент по индексу 0 <= index < size; иначе IndexError."""
-        # TODO: проверка границ + запись в буфер
-        raise NotImplementedError
+        if 0 <= index < self._size: self._buffer[index] = value
+        else: raise IndexError
+
 
 
 # ---------------------------------------------------------------------------
@@ -126,19 +160,30 @@ class Stack:
         return len(self._data)
 
     def push(self, value) -> None:
-        """Положить элемент на вершину. Амортизированная сложность: TODO."""
-        # TODO: делегировать DynamicArray.append
-        raise NotImplementedError
+        """Положить элемент на вершину. Амортизированная сложность: O(1)."""
+        self._data.append(value)
+
 
     def pop(self):
         """Снять элемент с вершины; для пустого стека — IndexError."""
-        # TODO: прочитать последний элемент, уменьшить размер
-        raise NotImplementedError
+
+        if len(self._data) == 0: raise IndexError
+        else:
+            index = len(self._data) - 1
+            value = self._data.get(index)
+            self._data.set(index, None)
+            self._data._size -= 1
+            return value
+
 
     def peek(self):
         """Вернуть вершину без удаления; для пустого стека — IndexError."""
-        # TODO
-        raise NotImplementedError
+
+        index = len(self._data) - 1
+        if len(self._data) == 0: raise IndexError
+        else:
+            return self._data.get(index)
+
 
 
 class _Node:
@@ -168,25 +213,52 @@ class Deque:
         return self._size
 
     def push_front(self, value) -> None:
-        """Добавить элемент в начало. Сложность: TODO."""
-        # TODO: создать узел, перевязать ссылки head (учесть пустой дек)
-        raise NotImplementedError
+
+        node = _Node(value)
+        if self._size == 0:
+            self._head = self._tail = node
+        else:
+            node.next = self._head
+            self._head.prev = node
+            self._head = node
+        self._size += 1
+        """Добавить элемент в начало. Сложность: O(1)."""
 
     def push_back(self, value) -> None:
-        """Добавить элемент в конец. Сложность: TODO."""
-        # TODO: симметрично push_front для tail
-        raise NotImplementedError
+        """Добавить элемент в конец. Сложность: O(1)."""
+
+        node = _Node(value)
+        if self._size == 0:
+            self._head = self._tail = node
+        else:
+            node.prev = self._tail
+            self._tail.next = node
+            self._tail = node
+        self._size += 1
 
     def pop_front(self):
-        """Извлечь элемент из начала; для пустого дека — IndexError."""
-        # TODO: учесть переход к пустому деку (tail тоже обнуляется)
-        raise NotImplementedError
+
+        if self._size == 0: raise IndexError
+        element = self._head.value
+        self._head = self._head.next
+        if self._head is None:
+            self._tail = None
+        else:
+            self._head.prev = None
+        self._size -= 1
+        return element
 
     def pop_back(self):
         """Извлечь элемент из конца; для пустого дека — IndexError."""
-        # TODO
-        raise NotImplementedError
-
+        if self._size == 0: raise IndexError
+        element = self._tail.value
+        self._tail = self._tail.prev
+        if self._tail is None:
+            self._head = None
+        else:
+            self._tail.next = None
+        self._size -= 1
+        return element
 
 # ---------------------------------------------------------------------------
 # 4. Репрезентативные тесты и инварианты (шаги 1–3 методики верификации)
@@ -287,6 +359,11 @@ def inserts_front_deque(n: int) -> None:
     for i in range(n):
         d.appendleft(i)
 
+def push_front_custom_deque(n: int) -> None:
+    """n вставок в начало в свой Deque — ожидаемо O(1) на операцию."""
+    d = Deque()
+    for i in range(n):
+        d.push_front(i)
 
 def run_benchmarks(seed: int) -> None:
     """Средняя стоимость append и сравнение вставки в начало list/deque."""
@@ -296,13 +373,17 @@ def run_benchmarks(seed: int) -> None:
     for n in SIZES:
         t = bench(appends_dynamic_array, n)
         print(f"  n={n:>7}  всего t={t:.6f} c  на операцию t/n={t / n:.3e} c")
-    print("\nВставка в начало: list.insert(0, x) против deque.appendleft:")
+    print("\nВставка в начало: list.insert(0, x) / collections.deque / свой Deque:")
     for n in SIZES:
         if n > 30_000:
             continue  # вставка в начало list квадратична по суммарному времени
         t_list = bench(inserts_front_list, n)
         t_deque = bench(inserts_front_deque, n)
-        print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c")
+        t_custom = bench(push_front_custom_deque, n)
+        print(
+            f"  n={n:>7}  list={t_list:.6f} c  "
+            f"deque={t_deque:.6f} c  custom={t_custom:.6f} c"
+        )
     # TODO: снять аналогичные замеры для push_front своего Deque;
     # TODO: построить график t/n от n для append и включить его в отчёт;
     # TODO: провести амортизированный анализ push_back методом учёта (в отчёте).
