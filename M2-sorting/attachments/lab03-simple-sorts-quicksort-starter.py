@@ -29,20 +29,65 @@ def bubble_sort(a: list) -> tuple[list, int, int]:
     именно он даёт лучший случай на упорядоченном входе.
     """
     # TODO: реализовать; считать сравнения и обмены
-    raise NotImplementedError
+    copy_a = a.copy()
+    n = len(copy_a)
+    swapps = 0
+    count = 0
+    if n > 0:
+        for i in range(n - 1):
+            swapped = False
 
+            for j in range (n - 1 - i):
+                count += 1
+                if copy_a[j] > copy_a[j + 1]:
+                    copy_a[j], copy_a[j + 1] = copy_a[j + 1], copy_a[j]
+                    swapped = True
+                    swapps += 1
+            if swapped == False:
+                break
+    return (copy_a, count, swapps)
 
 def insertion_sort(a: list) -> tuple[list, int, int]:
     """Сортировка вставками. Ожидаемая сложность: TODO (лучший/худший случаи)."""
     # TODO: реализовать; считать сравнения и перемещения (сдвиги)
-    raise NotImplementedError
 
+    copy_a = a.copy()
+    n = len(copy_a)
+    count, swapps = 0, 0
+    if n > 0:
+        for i in range(1, n):
+            for j in range(i, 0, -1):
+                count += 1
+                if copy_a[j] < copy_a[j - 1]:
+                    copy_a[j], copy_a[j - 1] = copy_a[j - 1], copy_a[j]
+                    swapps += 1
+                else:
+                    break
+    return copy_a, count, swapps
 
 def selection_sort(a: list) -> tuple[list, int, int]:
     """Сортировка выбором. Ожидаемая сложность: TODO (почему не зависит от входа?)."""
     # TODO: реализовать; считать сравнения и обмены
-    raise NotImplementedError
 
+    n = len(a)
+    copy_a = a.copy()
+    count, swapps = 0, 0
+    if n > 0:
+        for i in range(0, n - 1):
+            m = copy_a[i]
+            index = i
+            for j in range (i + 1, n):
+                count += 1
+                if m > copy_a[j]:
+                    m = copy_a[j]
+                    index = j
+
+            if index != i:
+                swapps += 1
+                temp = copy_a[i]
+                copy_a[i] = copy_a[index]
+                copy_a[index] = temp
+    return copy_a, count, swapps
 
 # ---------------------------------------------------------------------------
 # 2. QuickSort с рандомизированным опорным элементом
