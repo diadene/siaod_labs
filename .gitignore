@@ -244,3 +244,4 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 /lectures/Моя теория/
+/M2-sorting/test.py
