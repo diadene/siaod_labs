@@ -339,11 +339,11 @@ def run_benchmarks(seed: int) -> None:
                 results[(name, cls)]["times"].append(elapsed)
 
     # Создание папки для графиков
-    os.makedirs("plots", exist_ok=True)
+    os.makedirs("plots_lab3", exist_ok=True)
 
-    for file in os.listdir("plots"):
+    for file in os.listdir("plots_lab3"):
         if file.endswith(".png"):
-            os.remove(os.path.join("plots", file))
+            os.remove(os.path.join("plots_lab3", file))
     # Построение log-log графиков
     classes = ["упорядоченный", "случайный", "обратный"]
 
@@ -362,10 +362,10 @@ def run_benchmarks(seed: int) -> None:
         plt.grid(True, which="both")
         plt.legend()
 
-        plt.savefig(f"plots/{cls}.png", dpi=150)
+        plt.savefig(f"plots_lab3/{cls}.png", dpi=150)
         plt.close()
 
-    print("\nГрафики сохранены в папке plots/")
+    print("\nГрафики сохранены в папке plots_lab3/")
 
     # Таблицы счётчиков сравнений и обменов
     counter_algorithms = {
@@ -444,10 +444,6 @@ def run_benchmarks(seed: int) -> None:
     print("  Средний случай: O(n log n).")
     print("  Худший случай: O(n^2).")
     print("  Рандомизация pivot снижает вероятность худшего случая.")
-
-    print("\nНаклоны могут отличаться от теоретических оценок")
-    print("из-за особенностей оборудования, интерпретатора Python,")
-    print("размеров тестовых массивов и погрешностей измерений.")
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
