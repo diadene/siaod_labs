@@ -28,66 +28,69 @@ def merge(left: list, right: list, key) -> list:
     Стабильность: при равенстве ключей элемент из left идёт раньше.
     Ожидаемая сложность: O(m), где m = длина списка, количество сравнений = m - 1. TODO (обосновать в отчёте).
     """
-    out, i, j = [], 0, 0
-    while i < len(left) and j < len(right):
+    i = j = 0
+    n_a = len(left)
+    n_b = len(right)
+    merged = []
+
+    while i < n_a and j < n_b:
         if key(left[i]) <= key(right[j]):
-            out.append(left[i])
+            merged.append(left[i])
             i += 1
         else:
-            out.append(right[j])
+            merged.append(right[j])
             j += 1
-    out.extend(left[i:])
-    out.extend(right[j:])
-    return out
+
+    merged += left[i:] + right[j:]
+    return merged
 
     # TODO: два индекса, сравнение key(left[i]) <= key(right[j])
-    raise NotImplementedError
 
 
 def merge_sort(a: list, key=lambda x: x) -> list:
     """MergeSort: возвращает новый отсортированный список. Ожидаемая сложность: O(n log n), где n - сложность разбиения массива на подмассивы,
     log n - сложность слияния массивов TODO."""
-    if len(a) <= 1:
-        return list(a)
-    mid = len(a) // 2
-    left = merge_sort(a[:mid])
-    right = merge_sort(a[mid:])
+
+    n = len(a)
+    pivot = n // 2
+
+    left = a[:pivot]
+    right = a[pivot:]
+
+    if len(right) > 1:
+        right = merge_sort(right)
+    if len(left) > 1:
+        left = merge_sort(left)
     return merge(left, right, key)
 
     # TODO: рекурсивное деление пополам + merge()
-    raise NotImplementedError
 
 
 def counting_sort(a: list[int], key_max: int) -> list[int]:
     """Устойчивая сортировка подсчётом: ключи — целые из диапазона [0, key_max].
 
     Схема: массив счётчиков -> префиксные суммы -> расстановка с конца.
-    Ожидаемые время и память: TODO — выразить через n и k = key_max + 1;
-    ограничение диапазона ключей обсудить в отчёте.
-
-    Последовательность действий:
-    1. Создать массив для записи количества встречающихся чисел, равных индексу элемента массива.
-    Массив имеет размер (key_max - 1).
-    2. Записать количество втречающихся элементов по индексу этого числа (учитывать вариант, при котором одно и то же число может встречаться несколько раз)
-    3. Создать итоговый отсортированный массив на основе массива индексов
-    4.  Вывести отсортированный массив в return
-    """
+    Ожидаемые время и память: O(n + k), TODO — выразить через n и k = key_max + 1;
+    ограничение диапазона ключей обсудить в отчёте."""
     # TODO: реализовать; проход расстановки — с конца массива (иначе теряется устойчивость)
 
-    if a == [] or a is None: return []
-    # 1. Создание необходимых переменных
-    count = [0] * (key_max - 1)
-    out = []
+    if not a:
+        return []
 
-    # 2. Получение массива индексов
-    for i in a:
-        count[i] += 1
+    k = key_max + 1
+    count = [0] * k
 
-    # 3. Создание итогового массива
-    for i in range(key_max):
-        out.extend([i] * count[i])
+    for x in a:
+        count[x] += 1
 
-    # 4. Вывод итогового ответа
+    for i in range(1, k):
+        count[i] += count[i - 1]
+
+    out = [0] * len(a)
+    for x in reversed(a):
+        count[x] -= 1
+        out[count[x]] = x
+
     return out
 
 def radix_sort_lsd(a: list[int]) -> list[int]:
@@ -106,19 +109,10 @@ def radix_sort_lsd(a: list[int]) -> list[int]:
     # по цифре (a[i] // exp) % 10; объяснить, почему без устойчивости
     # внутреннего прохода алгоритм неверен
 
-    # Сложность: О(d * (n + k)),
-    # где d - количество разрядов
-    # n - количество элементов
-    # k - количество значений
-
     if a == [] or a is None: return []
     if a == [0]: return [0]
 
     exp = 1
-    # Последовательность действий:
-
-    # 1. Определение максимального разряда элементов
-    # 2. Сортировка подсчетом по каждому разряду чисел из массива
 
     while max(a) // exp > 0:
         out = counting_sort(a, exp)
@@ -144,47 +138,28 @@ def heap_sort(a: list[int]) -> None:
 def quick_sort(a: list[int]) -> list[int]:
     """QuickSort с рандомизацией опорного элемента — перенести из своей ЛР 3."""
 
-    def quick_sort(a: list, rng: random.Random | None = None) -> list:
-        """QuickSort с выбором опорного через rng.randrange.
-        Возвращает новый список.
+    if len(a) <= 1: return a
 
-        Ожидаемая сложность: в среднем O(N logN), в худшем случае O(n^2)
-        (обосновать в отчёте, объяснить роль рандомизации).
+    copy_a = a.copy()
 
-        rng передаётся снаружи, чтобы запуск был воспроизводим по seed варианта.
-        """
+    rng = random.Random()
 
-        # Базовый случай: пустой или одноэлементный массив
-        if len(a) <= 1:
-            return a.copy()
+    pivot = copy_a[rng.randrange(0, len(copy_a))]
 
-        if rng is None:
-            rng = random.Random()
+    left = []
+    right = []
+    eq = []
 
-        # Случайный выбор опорного элемента
-        pivot = a[rng.randrange(0, len(a))]
+    for i in copy_a:
+        if i < pivot:
+            left.append(i)
+        if i > pivot:
+            right.append(i)
+        if i == pivot:
+            eq.append(i)
 
-        # Разделение массива на три части
-        less = []
-        equal = []
-        greater = []
-
-        for i in a:
-            if i < pivot:
-                less.append(i)
-
-            elif i == pivot:
-                equal.append(i)
-
-            else:
-                greater.append(i)
-
-        # Рекурсивная сортировка частей
-        return (
-                quick_sort(less, rng)
-                + equal
-                + quick_sort(greater, rng)
-        )
+    copy_a = quick_sort(left) + eq + quick_sort(right)
+    return copy_a
 
 
 # ---------------------------------------------------------------------------
